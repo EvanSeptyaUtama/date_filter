@@ -1,0 +1,97 @@
+Fitur Data Filter Berdasarkan Waktu
+-----------------------------------
+Waktu : hari ini, kemarin, besok, minggu ini, minggu kemarin, bulan ini, bulan kemarin, tahun ini, tahun kemarin.
+
+- Buat file model 2(factory), 4(migration), 6(resource controller).
+- Modif migration. (name, last_name, email, gender, position).
+- Modif file fictory dengan code dibawah.
+ return [
+	'name' => fake()->firstName(),
+	'last_name' => fake()->lastName(),
+	'email' => fake()->unique()->safeEmail(),
+	'gender' => fake()->randomElements(['Male','Female'])[0],
+	'position' => fake()->randomElements(['CEO', 'HR Manager','Project Manager','Sales Manager', 'Accountant'])[0],
+ ];
+- Modif Seeder.
+
+//Today
+Employee::factory(6)->create([
+	'created_at' => Carbon::today(),
+]);
+
+//Yesterday
+Employee::factory(6)->create([
+	'created_at' => Carbon::yesterday(),
+]);
+
+//This week
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->startOfWeek(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 6));
+		$post->save();
+	});
+
+//This last week
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->subWeek()->startOfWeek(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 6));
+		$post->save();
+	});
+
+//This week
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->startOfWeek(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 6));
+		$post->save();
+	});
+
+//This month
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->startOfMonth(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 30));
+		$post->save();
+	});
+
+//This last month
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->subMonth()->startOfMonth(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 30));
+		$post->save();
+	});
+
+//This year
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->startOfYear(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 365));
+		$post->save();
+	});
+
+//This last year
+Employee::factory(6)->create([
+	'created_at' => Carbon::now()->subYear()->startOfYear(),
+	])->each(function ($post) {
+		$post->created_at = $post->created_at->addMinutes(rand(1, 1440 * 365));
+		$post->save();
+	});
+
+- Modif bagian controller fungsi index
+ $query = Employee::query();
+ $date = $request->date_filter;
+
+switch($date){
+	case 'today':
+	   $query->whereDate('created_at', Carbon::today());
+	   break;
+	case 'yesterday':
+	   $query->whereDate('created_at', Carbon::yesterday());
+	   break;
+	case 'this_week':
+	   $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+	   break;
+}
